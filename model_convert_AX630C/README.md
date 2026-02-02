@@ -1,4 +1,95 @@
-# 模型转换
+# RAFT-Stereo 模型转换（AX630C 适配版）
+
+## 概述
+
+本文档描述了将 RAFT-Stereo 模型适配到 AX630C NPU 所需的代码修改。由于 AX630C NPU 对某些操作的限制，需要对原始模型进行以下修改以确保模型能够正确转换和运行。
+
+## 主要修改内容
+
+### 1. 移除 ScatterND 操作
+
+**问题描述：** AX630C NPU 不支持 ScatterND 操作，需要替换为其他实现方式。
+
+**修改位置：** `core/corr.py` 中的相关代码
+
+**修改方案：** 将索引赋值操作改为使用 `torch.cat` 拼接
+
+**原始代码：**
+```python
+centroid_lvl[...,0] = centroid_lvl[...,0] / 2**i
+```
+
+**修改后：**
+```python
+centroid_lvl = torch.cat([centroid_lvl[..., 0:1] / 2**i, centroid_lvl[..., 1:2]], dim=-1)
+```
+
+### 2. upsample_flow 函数维度优化
+
+**问题描述：** AX630C NPU 不支持超过 5 维的张量操作，原始实现使用了 7 维操作。
+
+**修改位置：** `core/raft_stereo.py` 中的 `upsample_flow` 方法
+
+**修改方案：** 将 7 维操作拆分为多个 5 维以内的操作
+
+**原始代码：**
+```python
+def upsample_flow(self, flow, mask):
+    """ Upsample flow field [H/8, W/8, 2] -> [H, W, 2] using convex combination """
+    N, D, H, W = flow.shape
+    factor = 2 ** self.args.n_downsample
+    
+    # 原始: 7维操作，NPU不支持
+    mask = mask.view(N, 1, 9, factor, factor, H, W)
+    up_flow = up_flow.view(N, D, 9, 1, 1, H, W)
+    up_flow = torch.sum(mask * up_flow, dim=2)
+    # ...
+```
+
+**修改后：**
+```python
+def upsample_flow(self, flow, mask):
+    """ Upsample flow field [H/8, W/8, 2] -> [H, W, 2] using convex combination """
+    N, D, H, W = flow.shape
+    factor = 2 ** self.args.n_downsample
+    
+    # 修改: 降维到 5 维以内
+    mask = mask.view(N, 9, factor * factor, H, W)  # 5维
+    mask = torch.softmax(mask, dim=1)
+    
+    up_flow = F.unfold(factor * flow, [3, 3], padding=1)  # (N, D*9, H*W)
+    up_flow = up_flow.view(N, D, 9, H, W)  # 5维
+    
+    # 5维上做 sum 
+    up_flow = (mask.unsqueeze(1) * up_flow.unsqueeze(2)).sum(dim=2)  # (N, D, factor*factor, H, W)
+    
+    up_flow = up_flow.view(N, D, factor, factor, H, W)
+    up_flow = up_flow.permute(0, 1, 4, 2, 5, 3)
+    return up_flow.reshape(N, D, factor * H, factor * W)
+```
+
+### 3. 修复 ONNX 转换优化问题
+
+**问题描述：** 原始代码在转换为 ONNX 时会被错误优化为 DepthToSpace 操作，导致转换失败。
+
+**修改位置：** `core/raft_stereo.py` 中的 `upsample_flow` 方法末尾
+
+**修改方案：** 添加 `contiguous()` 和 `flatten()` 操作，避免 ONNX 优化器误识别
+
+**原始代码：**
+```python
+up_flow = up_flow.view(N, D, factor, factor, H, W)
+up_flow = up_flow.permute(0, 1, 4, 2, 5, 3)
+return up_flow.reshape(N, D, factor * H, factor * W)
+```
+
+**修改后：**
+```python
+up_flow = up_flow.view(N, D, factor, factor, H, W)
+up_flow = up_flow.permute(0, 1, 4, 2, 5, 3).contiguous()  
+up_flow = up_flow.flatten(2)  
+return up_flow.view(N, D, factor * H, factor * W)
+```
 
 ## 创建环境
 
