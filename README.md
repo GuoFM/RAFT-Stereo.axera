@@ -35,7 +35,7 @@ RAFT-Stereo.axera/
 ## 模型下载
 
 预编译模型下载 [models](https://github.com/AXERA-TECH/RAFT-Stereo.axera/releases/download/v1.0.0/models.tar.gz)
-或者[hugging](https://huggingface.co/AXERA-TECH/RAFT-stereo)
+或者[🤗AXERA-TECH/RAFT-stereo](https://huggingface.co/AXERA-TECH/RAFT-stereo)
 
 如需自行转换请参考：
 - AX650: [模型转换](./model_convert/README.md)
@@ -69,7 +69,7 @@ cd python
 python3 infer_onnx.py --left examples/left/000051_11.png --right examples/right/000051_11.png --model ../models/raft_steoro384x1280_r4.onnx
 ```
 输出结果：  
-![output](asserts/output-onnx-r4.png)
+![output](assets/output-onnx-r4.png)
 
 或：
 
@@ -77,7 +77,7 @@ python3 infer_onnx.py --left examples/left/000051_11.png --right examples/right/
 python3 infer_onnx.py --left examples/left/000051_11.png --right examples/right/000051_11.png --model ../models/raft_steoro256x640_r1.onnx
 ```
 输出结果:  
-![output](asserts/output-onnx-r1.png)
+![output](assets/output-onnx-r1.png)
 
 运行参数说明:  
 | 参数名称 | 说明  |
