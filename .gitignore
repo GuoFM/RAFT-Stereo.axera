@@ -30,11 +30,6 @@ install_manifest.txt
 *.pt
 *.ckpt
 
-# Output files
-output-*.png
-raft_stereo_*.png
-raft_stereo_*.jpg
-
 # Python
 __pycache__/
 *.py[cod]
