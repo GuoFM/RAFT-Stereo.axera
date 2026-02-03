@@ -215,9 +215,9 @@ Saved combined result: raft_stereo_result.png
 ```
 
 输出结果:  
-![output](assets/raft_stereo_result.png)
+![result](assets/raft_stereo_result.png)
 
-### C++ 运行参数说明
+C++ 运行参数说明
 
 | 参数 | 说明 |
 | --- | --- |
