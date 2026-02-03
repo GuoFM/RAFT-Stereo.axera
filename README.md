@@ -44,7 +44,7 @@ RAFT-Stereo.axera/
 - AX630C: [模型转换](./model_convert_ax630c/README.md)
 - AX637: 将[模型转换](./model_convert_ax630c/README.md)中的：
 ```
-pulsar2 build --input ../models/raft_steoro384x1280_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro384x1280_r4.axmodel --target_hardware AX620E --compiler.check 0
+pulsar2 build --input ../models/raft_steoro256x640_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro256x640_r4.axmodel --target_hardware AX620E --compiler.check 0
 ```
 或
 
@@ -54,7 +54,7 @@ pulsar2 build --input ../models/raft_steoro256x640_r1.onnx --config config_r1.js
 
 替换为：
 ```
-pulsar2 build --input ../models/raft_steoro384x1280_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro384x1280_r4.axmodel --target_hardware AX637 --compiler.check 0
+pulsar2 build --input ../models/raft_steoro256x640_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro256x640_r4.axmodel --target_hardware AX637 --compiler.check 0
 ```
 或
 
