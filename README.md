@@ -6,6 +6,7 @@ RAFT-Stereo 立体匹配深度估计模型在 AXERA NPU 平台上的部署 DEMO
 
 - [x] AX650N
 - [x] AX630C (AX620E)
+- [x] AX637
 
 ## 支持语言
 
@@ -26,7 +27,8 @@ RAFT-Stereo.axera/
 │   ├── toolchains/           # 交叉编译工具链配置
 │   ├── CMakeLists.txt        # CMake 配置
 │   ├── build650.sh           # AX650 编译脚本
-│   └── build630c.sh          # AX630C 编译脚本
+│   ├── build630c.sh          # AX630C 编译脚本
+│   └── build637.sh           # AX637 编译脚本
 ├── model_convert/            # AX650 模型转换
 ├── model_convert_ax630c/     # AX630C 模型转换
 └── README.md
@@ -40,6 +42,25 @@ RAFT-Stereo.axera/
 如需自行转换请参考：
 - AX650: [模型转换](./model_convert/README.md)
 - AX630C: [模型转换](./model_convert_ax630c/README.md)
+- AX637: 将[模型转换](./model_convert_ax630c/README.md)中的：
+```
+pulsar2 build --input ../models/raft_steoro384x1280_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro384x1280_r4.axmodel --target_hardware AX620E --compiler.check 0
+```
+或
+
+```
+pulsar2 build --input ../models/raft_steoro256x640_r1.onnx --config config_r1.json --output_dir build-output-r1 --output_name raft_steoro256x640_r1.axmodel --target_hardware AX620E --compiler.check 0
+```
+
+替换为：
+```
+pulsar2 build --input ../models/raft_steoro384x1280_r4.onnx --config config_r4.json --output_dir build-output-r4 --output_name raft_steoro384x1280_r4.axmodel --target_hardware AX637 --compiler.check 0
+```
+或
+
+```
+pulsar2 build --input ../models/raft_steoro256x640_r1.onnx --config config_r1.json --output_dir build-output-r1 --output_name raft_steoro256x640_r1.axmodel --target_hardware AX637 --compiler.check 0
+```
 
 ## Python API 运行
 
@@ -128,7 +149,7 @@ python3 infer.py --left examples/left/000051_11.png --right examples/right/00005
 构建脚本会自动下载以下依赖：
 - 交叉编译工具链 (gcc-arm-9.2-2019.12-x86_64-aarch64-none-linux-gnu)
 - OpenCV 预编译库 (aarch64)
-- BSP SDK (ax650n_bsp_sdk 或 ax620e_bsp_sdk)
+- BSP SDK (AX650/AX630C 自动下载；**AX637 需从 FAE 获取**)
 
 ### 编译
 
@@ -148,11 +169,26 @@ cd cpp
 ./build630c.sh
 ```
 
+**AX637:**
+
+AX637 的 BSP SDK 需要从 FAE 获取，编译时需要指定 BSP 路径：
+
+```bash
+cd cpp
+# 方式 1: 使用命令行参数
+./build637.sh --bsp /path/to/AX637_SDK/package/msp/out
+
+# 方式 2: 使用环境变量
+export BSP_MSP_DIR=/path/to/AX637_SDK/package/msp/out
+./build637.sh
+```
+
 首次编译会下载依赖（约 500MB），后续编译会复用已下载的文件。
 
 编译完成后，可执行文件位于：
 - AX650: `cpp/build_ax650/raft_stereo_inference`
 - AX630C: `cpp/build_ax630c/raft_stereo_inference`
+- AX637: `cpp/build_ax637/raft_stereo_inference`
 
 ### 上板部署
 
@@ -247,6 +283,13 @@ C++ 运行参数说明
 |---|---|
 | raft_steoro256x640_r1_npu2.axmodel | 317.765 |
 | raft_steoro256x640_r4_npu2.axmodel | 825.793 |
+
+### AX637
+
+| model | latency(ms) |
+|---|---|
+| raft_steoro256x640_r1_npu1.axmodel | TBD |
+| raft_steoro256x640_r4_npu1.axmodel | TBD |
 
 ## 技术讨论
 

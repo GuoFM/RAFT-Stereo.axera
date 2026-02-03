@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 
 # Target chip type (default to ax650)
 if(NOT DEFINED AXERA_TARGET_CHIP)
-    set(AXERA_TARGET_CHIP "ax650" CACHE STRING "AXERA target chip (ax650, ax630c)")
+    set(AXERA_TARGET_CHIP "ax650" CACHE STRING "AXERA target chip (ax650, ax630c, ax637)")
 endif()
 
 project(RAFT_Stereo CXX)
@@ -11,15 +11,6 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 message(STATUS "Building RAFT-Stereo for chip: ${AXERA_TARGET_CHIP}")
-
-# Set target chip define for conditional compilation
-if(AXERA_TARGET_CHIP STREQUAL "ax630c" OR AXERA_TARGET_CHIP STREQUAL "ax620e")
-    add_definitions(-DAXERA_TARGET_CHIP_AX620E)
-    message(STATUS "Using AX620E/AX630C configuration")
-elseif(AXERA_TARGET_CHIP STREQUAL "ax650")
-    add_definitions(-DAXERA_TARGET_CHIP_AX650)
-    message(STATUS "Using AX650 configuration")
-endif()
 
 # Set OpenCV directory (default to bundled prebuilt path, allow override)
 if(NOT DEFINED OpenCV_DIR)
@@ -69,6 +60,11 @@ target_link_libraries(raft_stereo_inference
     ax_interpreter
     ax_sys
 )
+
+if(AXERA_TARGET_CHIP STREQUAL "ax637")
+    target_link_libraries(raft_stereo_inference ax_ivps ax_hsm)
+    message(STATUS "AX637: Linking additional libraries (ax_ivps, ax_hsm)")
+endif()
 
 # Link OpenMP if available
 if(OpenMP_CXX_FOUND)
