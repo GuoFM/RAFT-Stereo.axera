@@ -288,8 +288,8 @@ C++ 运行参数说明
 
 | model | latency(ms) |
 |---|---|
-| raft_steoro256x640_r1_npu1.axmodel | TBD |
-| raft_steoro256x640_r4_npu1.axmodel | TBD |
+| raft_steoro256x640_r1_npu1.axmodel | 61.033 |
+| raft_steoro256x640_r4_npu1.axmodel | 99.094 |
 
 ## 技术讨论
 
